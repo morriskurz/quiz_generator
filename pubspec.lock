@@ -317,10 +317,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "6bf2a025117c7a182be11893a7f877ead23dc886"
+      resolved-ref: "5e5c5962156636ccd436dba9a0f69c6b113b6c14"
       url: "https://github.com/morriskurz/openai_gpt3_dart_api"
     source: git
-    version: "0.0.1"
+    version: "0.0.2"
   package_config:
     dependency: transitive
     description:
@@ -397,7 +397,7 @@ packages:
       name: shelf_web_socket
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.4+1"
+    version: "1.0.1"
   sky_engine:
     dependency: transitive
     description: flutter

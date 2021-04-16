@@ -10,10 +10,17 @@ class QuestionPage extends StatelessWidget {
       //Navigator.pushNamed(context, '/');
       return Container();
     }
-    return ListView(
-      children: [
-        ...args.questions.map((e) => QuestionAnswerWidget(question: e)).toList()
-      ],
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: ListView(
+          children: [
+            ...args.questions
+                .map((e) => QuestionAnswerWidget(question: e))
+                .toList()
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:loading_overlay/loading_overlay.dart';
+import 'package:openai_gpt3_api/completion.dart';
+import 'package:openai_gpt3_api/invalid_request_exception.dart';
 import 'package:openai_gpt3_api/openai_gpt3_api.dart';
 import 'package:quiz_generator/QuestionPage.dart';
+import 'package:quiz_generator/constants.dart';
 
 void main() {
   runApp(MyApp());
 }
 
 const OPENAI_API_KEY =
-    String.fromEnvironment('OPENAI_API_KEY', defaultValue: '123123123');
+    String.fromEnvironment('OPENAI_API_KEY', defaultValue: '');
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -56,10 +59,13 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   TextEditingController controller;
-  GPT3 api;
+  TextEditingController apiKeyController;
   bool _loading;
 
   Future<void> _sendTextToGpt3() async {
+    if (apiKeyController.text.isNotEmpty) {
+      Constants.initializeApi(apiKeyController.text);
+    }
     var text = controller.text;
     text =
         'Generate a quiz of three questions for the key points from this text:\n\"\"\"' +
@@ -70,13 +76,15 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() => _loading = true);
     CompletionApiResult answer;
     try {
-      answer = await api.completion(text,
+      answer = await Constants.api!.completion(text,
+          stop: '\n\n',
           engine: Engine.curieInstruct,
           maxTokens: 64,
           temperature: 0.2,
           topP: 1);
-    } on InvalidRequestException {
-      print('error');
+    } on InvalidRequestException catch (e) {
+      showErrorSnackBar(e, context);
+      setState(() => _loading = false);
       return;
     }
     var questions = '1. ' + answer.choices.first.text;
@@ -89,8 +97,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _MyHomePageState()
       : controller = TextEditingController(),
-        api = GPT3(OPENAI_API_KEY),
-        _loading = false;
+        apiKeyController = TextEditingController(),
+        _loading = false {
+    Constants.initializeApi(OPENAI_API_KEY);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,14 +138,28 @@ class _MyHomePageState extends State<MyHomePage> {
             // horizontal).
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              TextField(
-                controller: controller,
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                minLines: 5,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Input your text here',
+              Flexible(
+                child: TextField(
+                  controller: controller,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 5,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Input your text here',
+                  ),
+                ),
+              ),
+              Flexible(
+                child: TextField(
+                  controller: apiKeyController,
+                  maxLines: 1,
+                  minLines: 1,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Input your API key here',
+                  ),
                 ),
               )
             ],
