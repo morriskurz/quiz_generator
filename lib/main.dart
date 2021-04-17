@@ -1,10 +1,17 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:openai_gpt3_api/completion.dart';
 import 'package:openai_gpt3_api/invalid_request_exception.dart';
 import 'package:openai_gpt3_api/openai_gpt3_api.dart';
 import 'package:quiz_generator/QuestionPage.dart';
-import 'package:quiz_generator/constants.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+
+import 'file:///C:/AndroidStudioProjects/quiz_generator/lib/utils/constants.dart';
 
 void main() {
   runApp(MyApp());
@@ -61,6 +68,103 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController controller;
   TextEditingController apiKeyController;
   bool _loading;
+  bool _initialized;
+
+  // File picking
+  bool _loadingPath = false;
+  final _pickingType = FileType.custom;
+  List<PlatformFile>? _paths;
+  String? _fileName;
+
+  // PDF extraction
+  List<String> _chapterNames;
+  String? _selectedChapter;
+  PdfDocument? _document;
+
+  @override
+  void initState() {
+    initializeFlutterFire();
+    super.initState();
+  }
+
+  // Define an async function to initialize FlutterFire
+  void initializeFlutterFire() async {
+    try {
+      // Wait for Firebase to initialize and set `_initialized` state to true
+      await Firebase.initializeApp();
+      setState(() {
+        _initialized = true;
+        _loading = false;
+      });
+    } catch (e) {
+      // Set `_error` state to true if Firebase initialization fails
+
+    }
+  }
+
+  void _openFileExplorer() async {
+    setState(() => _loadingPath = true);
+    try {
+      _paths = (await FilePicker.platform.pickFiles(
+        type: _pickingType,
+        allowMultiple: false,
+        allowedExtensions: ['pdf', 'epub'],
+      ))
+          ?.files;
+    } on PlatformException catch (e) {
+      print('Unsupported operation' + e.toString());
+    } catch (ex) {
+      print(ex);
+    }
+    if (!mounted) return;
+    setState(() {
+      _loadingPath = false;
+      _fileName =
+          _paths != null ? _paths!.map((e) => e.name).toString() : '...';
+    });
+    _readPdf();
+  }
+
+  Future<List<int>> _readDocumentData() async {
+    final file = File(_paths!.first.path!);
+    return file.readAsBytes();
+  }
+
+  void _readPdf() async {
+    //Load an existing PDF document.
+    var document = PdfDocument(inputBytes: _paths!.first.bytes);
+    setState(() {
+      for (var i = 0; i < document.bookmarks.count; i++) {
+        _chapterNames.add(document.bookmarks[i].title);
+      }
+    });
+    _document = document;
+    print(_chapterNames);
+    print(document.bookmarks[4].title);
+    print(document.bookmarks[4].action);
+    print(document.bookmarks[4].destination);
+    print(document.bookmarks[4].namedDestination!.destination!.location);
+    print(document.bookmarks[4].namedDestination!.destination!.page);
+    print(document.bookmarks[4].namedDestination!.destination!.mode);
+    print(document.bookmarks[4].count);
+    print(document.bookmarks[4].color);
+    print(document.sections);
+    //Create a new instance of the PdfTextExtractor.
+    //var extractor = PdfTextExtractor(document);
+
+    //Extract all the text from the document.
+    //var text = extractor.extractText(endPageIndex: 10, startPageIndex: 0);
+    //print(text);
+  }
+
+  void _printChapter() {
+    if (_document == null ||
+        _document!.bookmarks.count == 0 ||
+        _selectedChapter == null) {
+      return;
+    }
+    //_document!.bookmarks
+  }
 
   Future<void> _sendTextToGpt3() async {
     if (apiKeyController.text.isNotEmpty) {
@@ -98,7 +202,9 @@ class _MyHomePageState extends State<MyHomePage> {
   _MyHomePageState()
       : controller = TextEditingController(),
         apiKeyController = TextEditingController(),
-        _loading = false {
+        _loading = false,
+        _chapterNames = [],
+        _initialized = false {
     Constants.initializeApi(OPENAI_API_KEY);
   }
 
@@ -118,52 +224,91 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: LoadingOverlay(
         isLoading: _loading,
-        child: Center(
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-          child: Column(
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Invoke "debug painting" (press "p" in the console, choose the
-            // "Toggle Debug Paint" action from the Flutter Inspector in Android
-            // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-            // to see the wireframe for each widget.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Flexible(
-                child: TextField(
-                  controller: controller,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  minLines: 5,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Input your text here',
-                  ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 1, // 20%
+              child: Container(),
+            ),
+            Expanded(
+              flex: 8, // 60%
+              child: Center(
+                // Center is a layout widget. It takes a single child and positions it
+                // in the middle of the parent.
+                child: Column(
+                  // Column is also a layout widget. It takes a list of children and
+                  // arranges them vertically. By default, it sizes itself to fit its
+                  // children horizontally, and tries to be as tall as its parent.
+                  //
+                  // Invoke "debug painting" (press "p" in the console, choose the
+                  // "Toggle Debug Paint" action from the Flutter Inspector in Android
+                  // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
+                  // to see the wireframe for each widget.
+                  //
+                  // Column has various properties to control how it sizes itself and
+                  // how it positions its children. Here we use mainAxisAlignment to
+                  // center the children vertically; the main axis here is the vertical
+                  // axis because Columns are vertical (the cross axis would be
+                  // horizontal).
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Row(
+                      children: [
+                        Expanded(child: Text(_fileName ?? '')),
+                        Flexible(
+                          child: TextButton(
+                            onPressed: () => _openFileExplorer(),
+                            child: Text('Upload PDF'),
+                          ),
+                        ),
+                        DropdownButton<String>(
+                          onChanged: (value) => setState(() {
+                            _selectedChapter = value!;
+                          }),
+                          value: _selectedChapter,
+                          hint: const Text('Which chapter?'),
+                          items: _chapterNames
+                              .map((e) =>
+                                  DropdownMenuItem(value: e, child: Text(e)))
+                              .toList(growable: false),
+                        ),
+                        TextButton(
+                            onPressed: _printChapter, child: Text('DEBUG'))
+                      ],
+                    ),
+                    Flexible(
+                      child: TextField(
+                        controller: controller,
+                        keyboardType: TextInputType.multiline,
+                        maxLines: null,
+                        minLines: 5,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Input your text here',
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      child: TextField(
+                        controller: apiKeyController,
+                        maxLines: 1,
+                        minLines: 1,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Input your API key here',
+                        ),
+                      ),
+                    )
+                  ],
                 ),
               ),
-              Flexible(
-                child: TextField(
-                  controller: apiKeyController,
-                  maxLines: 1,
-                  minLines: 1,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Input your API key here',
-                  ),
-                ),
-              )
-            ],
-          ),
+            ),
+            Expanded(
+              flex: 1, // 20%
+              child: Container(),
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
