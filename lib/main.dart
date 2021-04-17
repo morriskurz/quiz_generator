@@ -115,7 +115,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Call the user's CollectionReference to add a new user
     return books
-        .add({
+        .doc('ABC123') //TODO username
+        .set({
           'questions_answers': questionsMap,
           'timesCorrect': 0,
           'timesWrong': 0
