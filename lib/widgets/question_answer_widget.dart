@@ -1,14 +1,21 @@
+import 'dart:core';
+
 import 'package:flutter/material.dart';
 import 'package:openai_gpt3_api/completion.dart';
 import 'package:openai_gpt3_api/invalid_request_exception.dart';
 import 'package:quiz_generator/utils/constants.dart';
 
 class QuestionAnswerWidget extends StatefulWidget {
-  QuestionAnswerWidget({Key? key, required this.question, required this.answer})
+  QuestionAnswerWidget(
+      {Key? key,
+      required this.question,
+      required this.answer,
+      required this.displayingAnswerNotifier})
       : super(key: key);
 
   final String question;
   final String answer;
+  final ValueNotifier<bool> displayingAnswerNotifier;
 
   @override
   _QuestionAnswerWidgetState createState() => _QuestionAnswerWidgetState();
@@ -37,6 +44,7 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
   }
 
   void _displayAnswer() {
+    widget.displayingAnswerNotifier.value = true;
     setState(() => displayingAnswer = true);
   }
 
@@ -48,7 +56,7 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
             border: Border.all(width: 1.0),
             borderRadius: BorderRadius.all(
                 Radius.circular(5.0) //         <--- border radius here
-                ),
+            ),
           ),
           height: MediaQuery.of(context).size.width / 8,
           width: MediaQuery.of(context).size.width / 2,
@@ -74,6 +82,14 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
             onPressed: _displayAnswer, child: Text('Display answer')));
   }
 
+  @override
+  void initState() {
+    widget.displayingAnswerNotifier.addListener(() {
+      displayingAnswer = widget.displayingAnswerNotifier.value;
+    });
+    super.initState();
+  }
+
   _QuestionAnswerWidgetState()
       : controller = TextEditingController(),
         _loading = false,
@@ -84,23 +100,23 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
     return Center(
         child: Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        SizedBox(
-          height: 20,
-        ),
-        Text(
-          widget.question,
-          style: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 30,
-            color: const Color(0xde000000),
-            letterSpacing: -0.48,
-            fontWeight: FontWeight.w300,
-            height: 1.2,
-          ),
-        ),
-        _getDisplayingAnswerWidget(),
-      ],
-    ));
+          children: [
+            SizedBox(
+              height: 20,
+            ),
+            Text(
+              widget.question,
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 30,
+                color: const Color(0xde000000),
+                letterSpacing: -0.48,
+                fontWeight: FontWeight.w300,
+                height: 1.2,
+              ),
+            ),
+            _getDisplayingAnswerWidget(),
+          ],
+        ));
   }
 }

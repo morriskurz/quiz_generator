@@ -4,7 +4,9 @@ import 'package:quiz_generator/utils/constants.dart';
 import 'package:quiz_generator/widgets/question_answer_widget.dart';
 
 class QuestionPage extends StatefulWidget {
-  QuestionPage({Key? key}) : super(key: key);
+  QuestionPage({Key? key, required this.args}) : super(key: key);
+
+  final QuestionPageArguments? args;
 
   @override
   _QuestionPageState createState() => _QuestionPageState();
@@ -12,52 +14,79 @@ class QuestionPage extends StatefulWidget {
 
 class _QuestionPageState extends State<QuestionPage> {
   int _currentIndex;
-  QuestionPageArguments args;
   List<QuestionAnswerWidget> _questionAnswerWidgets;
+  bool _displayingAnswer = false;
 
   _QuestionPageState()
       : _currentIndex = 0,
-        args = QuestionPageArguments(['Test question 1', 'Test question 2'],
-            ['Test answer 1', 'Test answer 2']),
-        _questionAnswerWidgets = [] {
+        _questionAnswerWidgets = [],
+        _displayingAnswer = false {}
+
+  @override
+  void initState() {
+    var notifier = ValueNotifier<bool>(_displayingAnswer);
+    notifier.addListener(() {
+      setState(() {
+        print('Setting displayAnswer to ' + notifier.value.toString());
+        _displayingAnswer = notifier.value;
+      });
+    });
+    QuestionPageArguments args;
+    if (widget.args == null) {
+      args = QuestionPageArguments(['Test question 1', 'Test question 2'],
+          ['Test answer 1', 'Test answer 2']);
+    } else {
+      args = widget.args!;
+    }
     for (var i = 0; i < args.questions.length; i++) {
       _questionAnswerWidgets.add(QuestionAnswerWidget(
-          question: args.questions[i], answer: args.answers[i]));
+        question: args.questions[i],
+        answer: args.answers[i],
+        displayingAnswerNotifier: notifier,
+      ));
     }
-  }
-
-  List<QuestionAnswerWidget> _getQuestionAnswerWidgets(
-      QuestionPageArguments args) {
-    var result = <QuestionAnswerWidget>[];
-    for (var i = 0; i < args.questions.length; i++) {
-      result.add(QuestionAnswerWidget(
-          question: args.questions[i], answer: args.answers[i]));
-    }
-    return result;
+    super.initState();
   }
 
   void _nextIndex() {
-    if (_currentIndex == args.questions.length - 1) {
-      return null;
-    }
+    // Reset value so that it does not reveal the answer on the next question immediately.
+    _questionAnswerWidgets[_currentIndex + 1].displayingAnswerNotifier.value =
+        false;
     setState(() {
       _currentIndex++;
+      _displayingAnswer = false;
+    });
+  }
+
+  void _previousIndex() {
+    // Reset value so that it does not reveal the answer on the next question immediately.
+    _questionAnswerWidgets[_currentIndex - 1].displayingAnswerNotifier.value =
+        false;
+    setState(() {
+      _currentIndex--;
+      _displayingAnswer = false;
     });
   }
 
   double _getProgressPercentage() {
-    if (args.questions.isEmpty) {
+    if (_questionAnswerWidgets.isEmpty) {
       return 1;
     }
-    return _currentIndex / args.questions.length;
+    return _currentIndex / _questionAnswerWidgets.length;
+  }
+
+  void _againButton() {
+    _questionAnswerWidgets.add(_questionAnswerWidgets[_currentIndex]);
+    _nextIndex();
+  }
+
+  void _difficultyButton() {
+    _nextIndex();
+    // Für den Prototypen nicht wichtig, was hier passiert.
   }
 
   @override
   Widget build(BuildContext context) {
-    var args =
-        ModalRoute.of(context)!.settings.arguments as QuestionPageArguments?;
-    args ??= QuestionPageArguments(['Test question 1', 'Test question 2'],
-        ['Test answer 1', 'Test answer 2']);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromARGB(255, 26, 26, 26),
@@ -90,8 +119,8 @@ class _QuestionPageState extends State<QuestionPage> {
                   lineHeight: 20.0,
                   animationDuration: 500,
                   percent: _getProgressPercentage(),
-                  center:
-                      Text((_getProgressPercentage() * 100).toString() + '%'),
+                  center: Text(
+                      (_getProgressPercentage() * 100).ceil().toString() + '%'),
                   linearStrokeCap: LinearStrokeCap.roundAll,
                   progressColor: Colors.green,
                 ),
@@ -107,39 +136,32 @@ class _QuestionPageState extends State<QuestionPage> {
                         height: MediaQuery.of(context).size.width / 12,
                         width: MediaQuery.of(context).size.width / 6,
                         child: OutlinedButton(
-                            onPressed: null, child: Text('Again'))),
+                            onPressed: _displayingAnswer ? _againButton : null,
+                            child: Text('Again'))),
                     Container(
                         height: MediaQuery.of(context).size.width / 12,
                         width: MediaQuery.of(context).size.width / 6,
                         child: OutlinedButton(
-                            onPressed: null, child: Text('Hard'))),
+                            onPressed:
+                                _displayingAnswer ? _difficultyButton : null,
+                            child: Text('Hard'))),
                     Container(
                         height: MediaQuery.of(context).size.width / 12,
                         width: MediaQuery.of(context).size.width / 6,
                         child: OutlinedButton(
-                            onPressed: null, child: Text('Easy')))
+                            onPressed:
+                                _displayingAnswer ? _difficultyButton : null,
+                            child: Text('Easy')))
                   ],
                 ),
               ),
               ElevatedButton(
-                  onPressed: () {
-                    if (_currentIndex == 0) {
-                      return null;
-                    }
-                    setState(() {
-                      _currentIndex--;
-                    });
-                  },
+                  onPressed: _currentIndex == 0 ? null : _previousIndex,
                   child: Text('Back')),
               ElevatedButton(
-                  onPressed: () {
-                    if (_currentIndex == args!.questions.length - 1) {
-                      return null;
-                    }
-                    setState(() {
-                      _currentIndex++;
-                    });
-                  },
+                  onPressed: _currentIndex == _questionAnswerWidgets.length - 1
+                      ? null
+                      : _nextIndex,
                   child: Text('Next')),
             ],
           ),

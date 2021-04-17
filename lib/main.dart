@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +13,6 @@ import 'package:openai_gpt3_api/openai_gpt3_api.dart';
 import 'package:quiz_generator/QuestionPage.dart';
 import 'package:quiz_generator/utils/constants.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,9 +29,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       initialRoute: '/',
-      routes: {
-        '/': (context) => MyHomePage(title: 'KeepMind'),
-        '/qa': (context) => QuestionPage(),
+      onGenerateRoute: (RouteSettings settings) {
+        var routes = <String, WidgetBuilder>{
+          '/': (ctx) => MyHomePage(),
+          '/qa': (ctx) => QuestionPage(
+                args: settings.arguments as QuestionPageArguments?,
+              ),
+        };
+        var builder = routes[settings.name];
+        return MaterialPageRoute(builder: (ctx) => builder!(ctx));
       },
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -43,9 +48,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+  MyHomePage({Key? key}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -58,7 +61,6 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _initialized;
   // CollectionReference called books that references the firestore collection
   CollectionReference books = FirebaseFirestore.instance.collection('books');
-
 
   // File picking
   bool _loadingPath = false;
@@ -103,21 +105,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> addBook(List<String> questionsList, List<String> answersList) {
     //List of all questions and answers
-  var questionsMap = <String,String>{};
+    var questionsMap = <String, String>{};
 
-  for(final question in questionsList){
-    for(final answer in answersList){
-     questionsMap.addAll({question:answer});
+    for (final question in questionsList) {
+      for (final answer in answersList) {
+        questionsMap.addAll({question: answer});
+      }
     }
-  }
 
     // Call the user's CollectionReference to add a new user
     return books
         .add({
-      'questions_answers': questionsMap,
-      'timesCorrect': 0,
-      'timesWrong': 0
-    })
+          'questions_answers': questionsMap,
+          'timesCorrect': 0,
+          'timesWrong': 0
+        })
         .then((value) => print("Book Added"))
         .catchError((error) => print("Failed to add book: $error"));
   }
@@ -361,6 +363,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
 class AddBook extends StatelessWidget {
   final String bookName;
   final String bookAuthor;
@@ -378,11 +381,11 @@ class AddBook extends StatelessWidget {
       // Call the user's CollectionReference to add a new user
       return books
           .add({
-        'book_name': bookName,
-        'book_author': bookAuthor,
-        'timesCorrect': 0,
-        'timesWrong': 0
-      })
+            'book_name': bookName,
+            'book_author': bookAuthor,
+            'timesCorrect': 0,
+            'timesWrong': 0
+          })
           .then((value) => print("Book Added"))
           .catchError((error) => print("Failed to add book: $error"));
     }
