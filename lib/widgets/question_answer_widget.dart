@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:openai_gpt3_api/completion.dart';
 import 'package:openai_gpt3_api/invalid_request_exception.dart';
-
-import 'file:///C:/AndroidStudioProjects/quiz_generator/lib/utils/constants.dart';
+import 'package:quiz_generator/utils/constants.dart';
 
 class QuestionAnswerWidget extends StatefulWidget {
   QuestionAnswerWidget({Key? key, required this.question}) : super(key: key);
