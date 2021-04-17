@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +22,7 @@ void main() async {
 }
 
 const OPENAI_API_KEY =
-    String.fromEnvironment('OPENAI_API_KEY', defaultValue: '');
+String.fromEnvironment('OPENAI_API_KEY', defaultValue: '');
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -33,8 +34,8 @@ class MyApp extends StatelessWidget {
         var routes = <String, WidgetBuilder>{
           '/': (ctx) => MyHomePage(),
           '/qa': (ctx) => QuestionPage(
-                args: settings.arguments as QuestionPageArguments?,
-              ),
+            args: settings.arguments as QuestionPageArguments?,
+          ),
         };
         var builder = routes[settings.name];
         return MaterialPageRoute(builder: (ctx) => builder!(ctx));
@@ -106,22 +107,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> addBook(List<String> questionsList, List<String> answersList) {
     //List of all questions and answers
-    var questionsMap = <String, String>{};
+    var questionsAndAnswersMap = <String, String>{};
 
-    for (final question in questionsList) {
-      for (final answer in answersList) {
-        questionsMap.addAll({question: answer});
-      }
+    var iterator = 0;
+    for(final question in questionsList){
+      questionsAndAnswersMap[question] = answersList[iterator++];
     }
 
     // Call the user's CollectionReference to add a new user
     return books
-        .doc('ABC123') //TODO username
+        .doc('Marc')
         .set({
-          'questions_answers': questionsMap,
-          'timesCorrect': 0,
-          'timesWrong': 0
-        })
+      'questions_answers': questionsAndAnswersMap,
+      'timesCorrect': 0,
+      'timesWrong': 0
+    })
         .then((value) => print('Book Added'))
         .catchError((error) => print('Failed to add book: $error'));
   }
@@ -144,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _loadingPath = false;
       _fileName =
-          _paths != null ? _paths!.map((e) => e.name).toString() : '...';
+      _paths != null ? _paths!.map((e) => e.name).toString() : '...';
     });
     _readPdf();
   }
@@ -244,7 +244,7 @@ class _MyHomePageState extends State<MyHomePage> {
           stop: '\n\n',
           engine: Engine.curieInstruct,
           maxTokens: 100,
-          temperature: 0.4,
+          temperature: 0.5,
           frequencyPenalty: 0.1,
           presencePenalty: 0.1,
           topP: 1);
@@ -338,7 +338,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           hint: const Text('Which chapter?'),
                           items: _chapterNames
                               .map((e) =>
-                                  DropdownMenuItem(value: e, child: Text(e)))
+                              DropdownMenuItem(value: e, child: Text(e)))
                               .toList(growable: false),
                         ),
                         DropdownButton<int>(
@@ -349,8 +349,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           hint: const Text('Which chapter?'),
                           items: _chapterNames
                               .map((e) => DropdownMenuItem(
-                                  value: _chapterNames.indexOf(e),
-                                  child: Text(e)))
+                              value: _chapterNames.indexOf(e),
+                              child: Text(e)))
                               .toList(growable: false),
                         ),
                         TextButton(
@@ -396,41 +396,6 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: _sendTextToGpt3,
         tooltip: 'Send',
         child: Icon(Icons.send),
-      ),
-    );
-  }
-}
-
-class AddBook extends StatelessWidget {
-  final String bookName;
-  final String bookAuthor;
-  int timesCorrect;
-  int timesWrong;
-
-  AddBook(this.bookName, this.bookAuthor, this.timesCorrect, this.timesWrong);
-
-  @override
-  Widget build(BuildContext context) {
-    // Create a CollectionReference called books that references the firestore collection
-    CollectionReference books = FirebaseFirestore.instance.collection('books');
-
-    Future<void> addBook() {
-      // Call the user's CollectionReference to add a new user
-      return books
-          .add({
-            'book_name': bookName,
-            'book_author': bookAuthor,
-            'timesCorrect': 0,
-            'timesWrong': 0
-          })
-          .then((value) => print("Book Added"))
-          .catchError((error) => print("Failed to add book: $error"));
-    }
-
-    return TextButton(
-      onPressed: addBook,
-      child: Text(
-        "Add Book",
       ),
     );
   }
