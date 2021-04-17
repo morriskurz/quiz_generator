@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +13,7 @@ import 'package:openai_gpt3_api/openai_gpt3_api.dart';
 import 'package:quiz_generator/QuestionPage.dart';
 import 'package:quiz_generator/utils/constants.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,6 +56,9 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController apiKeyController;
   bool _loading;
   bool _initialized;
+  // CollectionReference called books that references the firestore collection
+  CollectionReference books = FirebaseFirestore.instance.collection('books');
+
 
   // File picking
   bool _loadingPath = false;
@@ -94,6 +99,27 @@ class _MyHomePageState extends State<MyHomePage> {
                   e.toString()),
           context);
     }
+  }
+
+  Future<void> addBook(List<String> questionsList, List<String> answersList) {
+    //List of all questions and answers
+  var questionsMap = <String,String>{};
+
+  for(final question in questionsList){
+    for(final answer in answersList){
+     questionsMap.addAll({question:answer});
+    }
+  }
+
+    // Call the user's CollectionReference to add a new user
+    return books
+        .add({
+      'questions_answers': questionsMap,
+      'timesCorrect': 0,
+      'timesWrong': 0
+    })
+        .then((value) => print("Book Added"))
+        .catchError((error) => print("Failed to add book: $error"));
   }
 
   void _openFileExplorer() async {
@@ -206,9 +232,14 @@ class _MyHomePageState extends State<MyHomePage> {
     print(answersString);
     var questionsList = questionsString.split('\n');
     var answersList = answersString.split('\n');
+
     // Ensure both have same size
     questionsList.length = min(questionsList.length, answersList.length);
     answersList.length = min(questionsList.length, answersList.length);
+
+    //save Lists for database
+    await addBook(questionsList, answersList);
+
     await Navigator.pushNamed(context, '/qa',
         arguments: QuestionPageArguments(questionsList, answersList));
     setState(() => _loading = false);
@@ -326,6 +357,40 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: _sendTextToGpt3,
         tooltip: 'Send',
         child: Icon(Icons.send),
+      ),
+    );
+  }
+}
+class AddBook extends StatelessWidget {
+  final String bookName;
+  final String bookAuthor;
+  int timesCorrect;
+  int timesWrong;
+
+  AddBook(this.bookName, this.bookAuthor, this.timesCorrect, this.timesWrong);
+
+  @override
+  Widget build(BuildContext context) {
+    // Create a CollectionReference called books that references the firestore collection
+    CollectionReference books = FirebaseFirestore.instance.collection('books');
+
+    Future<void> addBook() {
+      // Call the user's CollectionReference to add a new user
+      return books
+          .add({
+        'book_name': bookName,
+        'book_author': bookAuthor,
+        'timesCorrect': 0,
+        'timesWrong': 0
+      })
+          .then((value) => print("Book Added"))
+          .catchError((error) => print("Failed to add book: $error"));
+    }
+
+    return TextButton(
+      onPressed: addBook,
+      child: Text(
+        "Add Book",
       ),
     );
   }
