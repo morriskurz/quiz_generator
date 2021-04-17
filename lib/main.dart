@@ -9,9 +9,8 @@ import 'package:openai_gpt3_api/completion.dart';
 import 'package:openai_gpt3_api/invalid_request_exception.dart';
 import 'package:openai_gpt3_api/openai_gpt3_api.dart';
 import 'package:quiz_generator/QuestionPage.dart';
+import 'package:quiz_generator/utils/constants.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-
-import 'file:///C:/AndroidStudioProjects/quiz_generator/lib/utils/constants.dart';
 
 void main() {
   runApp(MyApp());
@@ -83,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    _loading = true;
     initializeFlutterFire();
     super.initState();
   }
@@ -98,7 +98,13 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     } catch (e) {
       // Set `_error` state to true if Firebase initialization fails
-
+      setState(() {
+        _loading = false;
+      });
+      showErrorSnackBar(
+          InvalidRequestException(
+              'Unable to reach the service. Please try again later.'),
+          context);
     }
   }
 
