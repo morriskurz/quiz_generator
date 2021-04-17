@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:quiz_generator/widgets/question_answer_widget.dart';
 
 class QuestionPage extends StatelessWidget {
+  List<QuestionAnswerWidget> _getQuestionAnswerWidgets(
+      QuestionPageArguments args) {
+    var result = <QuestionAnswerWidget>[];
+    for (var i = 0; i < args.questions.length; i++) {
+      result.add(QuestionAnswerWidget(
+          question: args.questions[i], answer: args.answers[i]));
+    }
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     final args =
@@ -14,11 +24,7 @@ class QuestionPage extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(15.0),
         child: ListView(
-          children: [
-            ...args.questions
-                .map((e) => QuestionAnswerWidget(question: e))
-                .toList()
-          ],
+          children: _getQuestionAnswerWidgets(args),
         ),
       ),
     );
@@ -27,6 +33,7 @@ class QuestionPage extends StatelessWidget {
 
 class QuestionPageArguments {
   final List<String> questions;
+  final List<String> answers;
 
-  QuestionPageArguments(this.questions);
+  QuestionPageArguments(this.questions, this.answers);
 }

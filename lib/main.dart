@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -166,30 +167,51 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     var text = controller.text;
     text =
-        'Generate a quiz of three questions for the key points from this text:\n\"\"\"' +
+        'What are some key points I should know when studying this text:\n\"\"\"' +
             text +
-            '\n\"\"\"\nThe three quiz questions are:\n1.';
+            '\n\"\"\"\n1.';
     var words = text.split(' ');
     var numberOfWords = words.length;
     setState(() => _loading = true);
-    CompletionApiResult answer;
+    CompletionApiResult answers;
+    CompletionApiResult questions;
     try {
-      answer = await Constants.api!.completion(text,
+      answers = await Constants.api!.completion(text,
           stop: '\n\n',
           engine: Engine.curieInstruct,
           maxTokens: 64,
-          temperature: 0.2,
+          temperature: 0.4,
+          frequencyPenalty: 0.1,
+          presencePenalty: 0.1,
+          topP: 1);
+      var keyPoints = answers.choices.first.text;
+      text = 'Formulate questions to these statements:\n\"\"\"' +
+          keyPoints +
+          '\n\"\"\"\n1.';
+      questions = await Constants.api!.completion(text,
+          stop: '\n\n',
+          engine: Engine.curieInstruct,
+          maxTokens: 64,
+          temperature: 0.4,
+          frequencyPenalty: 0.1,
+          presencePenalty: 0.1,
           topP: 1);
     } on InvalidRequestException catch (e) {
       showErrorSnackBar(e, context);
       setState(() => _loading = false);
       return;
     }
-    var questions = '1. ' + answer.choices.first.text;
-    print(questions);
-    print(questions.split('\n').toString());
+    var questionsString = '1.' + questions.choices.first.text;
+    var answersString = '1.' + answers.choices.first.text;
+    print(questionsString);
+    print(answersString);
+    var questionsList = questionsString.split('\n');
+    var answersList = answersString.split('\n');
+    // Ensure both have same size
+    questionsList.length = min(questionsList.length, answersList.length);
+    answersList.length = min(questionsList.length, answersList.length);
     await Navigator.pushNamed(context, '/qa',
-        arguments: QuestionPageArguments(questions.split('\n')));
+        arguments: QuestionPageArguments(questionsList, answersList));
     setState(() => _loading = false);
   }
 

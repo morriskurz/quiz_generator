@@ -4,9 +4,11 @@ import 'package:openai_gpt3_api/invalid_request_exception.dart';
 import 'package:quiz_generator/utils/constants.dart';
 
 class QuestionAnswerWidget extends StatefulWidget {
-  QuestionAnswerWidget({Key? key, required this.question}) : super(key: key);
+  QuestionAnswerWidget({Key? key, required this.question, required this.answer})
+      : super(key: key);
 
   final String question;
+  final String answer;
 
   @override
   _QuestionAnswerWidgetState createState() => _QuestionAnswerWidgetState();
@@ -21,7 +23,7 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
     setState(() => _loading = true);
     CompletionApiResult result;
     try {
-      result = await Constants.api!.completion(controller.text);
+      //result = await Constants.api!.completion(controller.text);
     } on InvalidRequestException catch (e) {
       setState(() => _loading = false);
       showErrorSnackBar(e, context);
@@ -29,7 +31,7 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
     }
     setState(() {
       _loading = false;
-      _answerText = result.choices.first.text;
+      _answerText = widget.answer;
     });
   }
 
