@@ -18,6 +18,7 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
   TextEditingController controller;
   bool _loading;
   String _answerText;
+  bool displayingAnswer = false;
 
   void _submitAnswer() async {
     setState(() => _loading = true);
@@ -35,6 +36,44 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
     });
   }
 
+  void _displayAnswer() {
+    setState(() => displayingAnswer = true);
+  }
+
+  Widget _getDisplayingAnswerWidget() {
+    if (displayingAnswer) {
+      return Container(
+          alignment: Alignment.topCenter,
+          decoration: BoxDecoration(
+            border: Border.all(width: 1.0),
+            borderRadius: BorderRadius.all(
+                Radius.circular(5.0) //         <--- border radius here
+                ),
+          ),
+          height: MediaQuery.of(context).size.width / 8,
+          width: MediaQuery.of(context).size.width / 2,
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Text(
+              widget.answer,
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 20,
+                color: const Color(0xde000000),
+                letterSpacing: -0.48,
+                fontWeight: FontWeight.w300,
+                height: 1.2,
+              ),
+            ),
+          ));
+    }
+    return Container(
+        height: MediaQuery.of(context).size.width / 8,
+        width: MediaQuery.of(context).size.width / 2,
+        child: OutlinedButton(
+            onPressed: _displayAnswer, child: Text('Display answer')));
+  }
+
   _QuestionAnswerWidgetState()
       : controller = TextEditingController(),
         _loading = false,
@@ -43,41 +82,25 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Card(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-              leading: Icon(Icons.question_answer),
-              title: Text(widget.question),
-            ),
-            SizedBox(
-              height: 100,
-              child: Flexible(
-                child: TextField(
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'answer',
-                  ),
-                  minLines: 2,
-                  maxLines: 5,
-                ),
-              ),
-            ),
-            Text(_answerText),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                TextButton(
-                  onPressed: () => _submitAnswer(),
-                  child: const Text('EVALUATE'),
-                ),
-                const SizedBox(width: 8),
-              ],
-            ),
-          ],
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        SizedBox(
+          height: 20,
         ),
-      ),
-    );
+        Text(
+          widget.question,
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 30,
+            color: const Color(0xde000000),
+            letterSpacing: -0.48,
+            fontWeight: FontWeight.w300,
+            height: 1.2,
+          ),
+        ),
+        _getDisplayingAnswerWidget(),
+      ],
+    ));
   }
 }
