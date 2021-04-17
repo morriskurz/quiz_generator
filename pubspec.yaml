@@ -37,6 +37,8 @@ dependencies:
   file_picker: ^3.0.1
   syncfusion_flutter_pdf: ^19.1.56-beta
   firebase_auth: ^1.1.0
+  firebase_core: ^1.0.3
+  cloud_firestore: ^1.0.5
 
 dev_dependencies:
   flutter_test:
