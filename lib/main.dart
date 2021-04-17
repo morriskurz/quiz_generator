@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -215,19 +214,6 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() => _loading = false);
   }
 
-  Future<UserCredential> _signInWithGoogle() async {
-    // Create a new provider
-    var googleProvider = GoogleAuthProvider();
-
-    googleProvider.setCustomParameters({'login_hint': 'user@example.com'});
-
-    // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance.signInWithPopup(googleProvider);
-
-    // Or use signInWithRedirect
-    // return await FirebaseAuth.instance.signInWithRedirect(googleProvider);
-  }
-
   _MyHomePageState()
       : controller = TextEditingController(),
         apiKeyController = TextEditingController(),
@@ -244,12 +230,19 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        backgroundColor: Color.fromARGB(255, 26, 26, 26),
+        title: TextButton(
+            onPressed: () => navigateToHome(context),
+            child: Image.asset(
+              'assets/logo.png',
+              fit: BoxFit.fitHeight,
+              scale: 2.5,
+            )),
         actions: [
-          ElevatedButton(
+          TextButton(
             onPressed: () {
               if (_initialized) {
-                _signInWithGoogle();
+                signInWithGoogle();
               }
             },
             child: Text('LOG IN'),
