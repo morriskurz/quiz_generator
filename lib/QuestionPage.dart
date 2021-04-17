@@ -20,7 +20,7 @@ class _QuestionPageState extends State<QuestionPage> {
   _QuestionPageState()
       : _currentIndex = 0,
         _questionAnswerWidgets = [],
-        _displayingAnswer = false {}
+        _displayingAnswer = false;
 
   @override
   void initState() {

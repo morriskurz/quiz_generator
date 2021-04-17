@@ -71,6 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // PDF extraction
   List<String> _chapterNames;
   String? _selectedChapter;
+  int? _selectedChapterIndex;
   PdfDocument? _document;
 
   @override
@@ -121,8 +122,8 @@ class _MyHomePageState extends State<MyHomePage> {
           'timesCorrect': 0,
           'timesWrong': 0
         })
-        .then((value) => print("Book Added"))
-        .catchError((error) => print("Failed to add book: $error"));
+        .then((value) => print('Book Added'))
+        .catchError((error) => print('Failed to add book: $error'));
   }
 
   void _openFileExplorer() async {
@@ -162,15 +163,22 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
     _document = document;
+    if (_document!.bookmarks.count == 0) {
+      showErrorSnackBar(
+          InvalidRequestException(
+              'Sorry, this book does not contain bookmarks.'),
+          context);
+      return;
+    }
     print(_chapterNames);
-    print(document.bookmarks[4].title);
-    print(document.bookmarks[4].action);
-    print(document.bookmarks[4].destination);
-    print(document.bookmarks[4].namedDestination!.destination!.location);
-    print(document.bookmarks[4].namedDestination!.destination!.page);
-    print(document.bookmarks[4].namedDestination!.destination!.mode);
-    print(document.bookmarks[4].count);
-    print(document.bookmarks[4].color);
+    print(document.bookmarks[0].title);
+    print(document.bookmarks[0].action);
+    print(document.bookmarks[0].destination);
+    print(document.bookmarks[0].namedDestination!.destination!.location);
+    print(document.bookmarks[0].namedDestination!.destination!.page);
+    print(document.bookmarks[0].namedDestination!.destination!.mode);
+    print(document.bookmarks[0].count);
+    print(document.bookmarks[0].color);
     print(document.sections);
     //Create a new instance of the PdfTextExtractor.
     //var extractor = PdfTextExtractor(document);
@@ -183,10 +191,26 @@ class _MyHomePageState extends State<MyHomePage> {
   void _printChapter() {
     if (_document == null ||
         _document!.bookmarks.count == 0 ||
-        _selectedChapter == null) {
+        _selectedChapter == null ||
+        _selectedChapterIndex == null) {
       return;
     }
-    //_document!.bookmarks
+
+    var firstPage = _document!
+        .bookmarks[_selectedChapterIndex!].namedDestination!.destination!.page;
+    PdfPage lastPage;
+    if (_selectedChapterIndex! < _document!.bookmarks.count - 1) {
+      lastPage = _document!.bookmarks[_selectedChapterIndex! + 1]
+          .namedDestination!.destination!.page;
+    } else {
+      lastPage = _document!.pages[_document!.pages.count - 1];
+    }
+    var indexOfFirstPage = (_document!.pages.indexOf(firstPage));
+    var indexOfLastPage = (_document!.pages.indexOf(lastPage));
+    var extractor = PdfTextExtractor(_document!);
+    var text = extractor.extractText(
+        endPageIndex: indexOfLastPage, startPageIndex: indexOfFirstPage);
+    print(text);
   }
 
   Future<void> _sendTextToGpt3() async {
@@ -207,8 +231,8 @@ class _MyHomePageState extends State<MyHomePage> {
       answers = await Constants.api!.completion(text,
           stop: '\n\n',
           engine: Engine.curieInstruct,
-          maxTokens: 64,
-          temperature: 0.4,
+          maxTokens: 100,
+          temperature: 0.5,
           frequencyPenalty: 0.1,
           presencePenalty: 0.1,
           topP: 1);
@@ -219,7 +243,7 @@ class _MyHomePageState extends State<MyHomePage> {
       questions = await Constants.api!.completion(text,
           stop: '\n\n',
           engine: Engine.curieInstruct,
-          maxTokens: 64,
+          maxTokens: 100,
           temperature: 0.4,
           frequencyPenalty: 0.1,
           presencePenalty: 0.1,
@@ -315,6 +339,18 @@ class _MyHomePageState extends State<MyHomePage> {
                           items: _chapterNames
                               .map((e) =>
                                   DropdownMenuItem(value: e, child: Text(e)))
+                              .toList(growable: false),
+                        ),
+                        DropdownButton<int>(
+                          onChanged: (value) => setState(() {
+                            _selectedChapterIndex = value!;
+                          }),
+                          value: _selectedChapterIndex,
+                          hint: const Text('Which chapter?'),
+                          items: _chapterNames
+                              .map((e) => DropdownMenuItem(
+                                  value: _chapterNames.indexOf(e),
+                                  child: Text(e)))
                               .toList(growable: false),
                         ),
                         TextButton(
