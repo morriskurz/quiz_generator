@@ -56,7 +56,7 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
             border: Border.all(width: 1.0),
             borderRadius: BorderRadius.all(
                 Radius.circular(5.0) //         <--- border radius here
-            ),
+                ),
           ),
           height: MediaQuery.of(context).size.width / 8,
           width: MediaQuery.of(context).size.width / 2,
@@ -100,23 +100,23 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
     return Center(
         child: Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            SizedBox(
-              height: 20,
-            ),
-            Text(
-              widget.question,
-              style: TextStyle(
-                fontFamily: 'Roboto',
-                fontSize: 30,
-                color: const Color(0xde000000),
-                letterSpacing: -0.48,
-                fontWeight: FontWeight.w300,
-                height: 1.2,
-              ),
-            ),
-            _getDisplayingAnswerWidget(),
-          ],
-        ));
+      children: [
+        SizedBox(
+          height: 20,
+        ),
+        Text(
+          widget.question,
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: 30,
+            color: const Color(0xde000000),
+            letterSpacing: -0.48,
+            fontWeight: FontWeight.w300,
+            height: 1.2,
+          ),
+        ),
+        _getDisplayingAnswerWidget(),
+      ],
+    ));
   }
 }
