@@ -10,6 +10,7 @@ import 'package:loading_overlay/loading_overlay.dart';
 import 'package:openai_gpt3_api/completion.dart';
 import 'package:openai_gpt3_api/invalid_request_exception.dart';
 import 'package:openai_gpt3_api/openai_gpt3_api.dart';
+import 'package:quiz_generator/ProfilePage.dart';
 import 'package:quiz_generator/QuestionPage.dart';
 import 'package:quiz_generator/utils/constants.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       onGenerateRoute: (RouteSettings settings) {
         var routes = <String, WidgetBuilder>{
-          '/': (ctx) => MyHomePage(),
+          '/': (ctx) => ProfilePage(),
           '/qa': (ctx) => QuestionPage(
                 args: settings.arguments as QuestionPageArguments?,
               ),
@@ -63,14 +64,12 @@ class _MyHomePageState extends State<MyHomePage> {
   CollectionReference books = FirebaseFirestore.instance.collection('books');
 
   // File picking
-  bool _loadingPath = false;
   final _pickingType = FileType.custom;
   List<PlatformFile>? _paths;
   String? _fileName;
 
   // PDF extraction
   List<String> _chapterNames;
-  String? _selectedChapter;
   int? _selectedChapterIndex;
   PdfDocument? _document;
 
@@ -127,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _openFileExplorer() async {
-    setState(() => _loadingPath = true);
+    setState(() => _loading = true);
     try {
       _paths = (await FilePicker.platform.pickFiles(
         type: _pickingType,
@@ -142,7 +141,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     if (!mounted) return;
     setState(() {
-      _loadingPath = false;
       _fileName =
           _paths != null ? _paths!.map((e) => e.name).toString() : '...';
     });
@@ -163,6 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
     _document = document;
+    setState(() => _loading = false);
     if (_document!.bookmarks.count == 0) {
       showErrorSnackBar(
           InvalidRequestException(
@@ -174,9 +173,6 @@ class _MyHomePageState extends State<MyHomePage> {
     print(document.bookmarks[0].title);
     print(document.bookmarks[0].action);
     print(document.bookmarks[0].destination);
-    print(document.bookmarks[0].namedDestination!.destination!.location);
-    print(document.bookmarks[0].namedDestination!.destination!.page);
-    print(document.bookmarks[0].namedDestination!.destination!.mode);
     print(document.bookmarks[0].count);
     print(document.bookmarks[0].color);
     print(document.sections);
@@ -191,39 +187,52 @@ class _MyHomePageState extends State<MyHomePage> {
   void _printChapter() {
     if (_document == null ||
         _document!.bookmarks.count == 0 ||
-        _selectedChapter == null ||
         _selectedChapterIndex == null) {
       return;
     }
-
-    var firstPage = _document!
-        .bookmarks[_selectedChapterIndex!].namedDestination!.destination!.page;
+    PdfPage firstPage;
+    if (_document!.bookmarks[_selectedChapterIndex!].namedDestination == null) {
+      firstPage =
+          _document!.bookmarks[_selectedChapterIndex!].destination!.page;
+    } else {
+      firstPage = _document!.bookmarks[_selectedChapterIndex!].namedDestination!
+          .destination!.page;
+    }
     PdfPage lastPage;
     if (_selectedChapterIndex! < _document!.bookmarks.count - 1) {
-      lastPage = _document!.bookmarks[_selectedChapterIndex! + 1]
-          .namedDestination!.destination!.page;
+      if (_document!.bookmarks[_selectedChapterIndex! + 1].namedDestination ==
+          null) {
+        lastPage =
+            _document!.bookmarks[_selectedChapterIndex! + 1].destination!.page;
+      } else {
+        lastPage = _document!.bookmarks[_selectedChapterIndex! + 1]
+            .namedDestination!.destination!.page;
+      }
     } else {
       lastPage = _document!.pages[_document!.pages.count - 1];
     }
     var indexOfFirstPage = (_document!.pages.indexOf(firstPage));
     var indexOfLastPage = (_document!.pages.indexOf(lastPage));
+    print('First page $indexOfFirstPage, last page $indexOfLastPage');
     var extractor = PdfTextExtractor(_document!);
     var text = extractor.extractText(
-        endPageIndex: indexOfLastPage, startPageIndex: indexOfFirstPage);
+        endPageIndex: indexOfLastPage - 1, startPageIndex: indexOfFirstPage);
     print(text);
+    _sendTextToGpt3(text);
   }
 
-  Future<void> _sendTextToGpt3() async {
+  Future<void> _sendTextToGpt3(String text) async {
     if (apiKeyController.text.isNotEmpty) {
       Constants.initializeApi(apiKeyController.text);
     }
-    var text = controller.text;
-    text =
-        'What are some key points I should know when studying this text:\n\"\"\"' +
-            text +
-            '\n\"\"\"\n1.';
     var words = text.split(' ');
     var numberOfWords = words.length;
+    print('Nr of words: $numberOfWords');
+    text =
+        'What are some key points I should know when studying this text:\n\"\"\"' +
+            text.substring(0, min(numberOfWords * 4, 6000)) +
+            '\n\"\"\"\n1.';
+
     setState(() => _loading = true);
     CompletionApiResult answers;
     CompletionApiResult questions;
@@ -233,8 +242,8 @@ class _MyHomePageState extends State<MyHomePage> {
           engine: Engine.curieInstruct,
           maxTokens: 100,
           temperature: 0.5,
-          frequencyPenalty: 0.1,
-          presencePenalty: 0.1,
+          frequencyPenalty: 0.15,
+          presencePenalty: 0.15,
           topP: 1);
       var keyPoints = answers.choices.first.text;
       text = 'Formulate questions to these statements:\n\"\"\"' +
@@ -245,8 +254,8 @@ class _MyHomePageState extends State<MyHomePage> {
           engine: Engine.curieInstruct,
           maxTokens: 100,
           temperature: 0.4,
-          frequencyPenalty: 0.1,
-          presencePenalty: 0.1,
+          frequencyPenalty: 0.15,
+          presencePenalty: 0.15,
           topP: 1);
     } on InvalidRequestException catch (e) {
       showErrorSnackBar(e, context);
@@ -330,17 +339,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: Text('Upload PDF'),
                           ),
                         ),
-                        DropdownButton<String>(
-                          onChanged: (value) => setState(() {
-                            _selectedChapter = value!;
-                          }),
-                          value: _selectedChapter,
-                          hint: const Text('Which chapter?'),
-                          items: _chapterNames
-                              .map((e) =>
-                                  DropdownMenuItem(value: e, child: Text(e)))
-                              .toList(growable: false),
-                        ),
                         DropdownButton<int>(
                           onChanged: (value) => setState(() {
                             _selectedChapterIndex = value!;
@@ -393,7 +391,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _sendTextToGpt3,
+        onPressed: () => _sendTextToGpt3(controller.text),
         tooltip: 'Send',
         child: Icon(Icons.send),
       ),

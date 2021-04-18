@@ -116,13 +116,18 @@ class _QuestionPageState extends State<QuestionPage> {
                 child: LinearPercentIndicator(
                   width: MediaQuery.of(context).size.width - 60,
                   animation: true,
+                  linearGradient: LinearGradient(
+                    colors: [
+                      Color.fromARGB(255, 0, 116, 252),
+                      Color.fromARGB(255, 0, 255, 159),
+                    ],
+                  ),
                   lineHeight: 20.0,
                   animationDuration: 500,
                   percent: _getProgressPercentage(),
                   center: Text(
                       (_getProgressPercentage() * 100).ceil().toString() + '%'),
                   linearStrokeCap: LinearStrokeCap.roundAll,
-                  progressColor: Colors.green,
                 ),
               ),
               Expanded(flex: 3, child: _questionAnswerWidgets[_currentIndex]),
