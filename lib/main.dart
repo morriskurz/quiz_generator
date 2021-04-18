@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         var builder = routes[settings.name];
         return MaterialPageRoute(builder: (ctx) => builder!(ctx));
       },
-      title: 'Flutter Demo',
+      title: 'Keepmind\'s Quiz Generator',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -276,10 +276,10 @@ class _MyHomePageState extends State<MyHomePage> {
     questionsList.length = min(questionsList.length, answersList.length);
     answersList.length = min(questionsList.length, answersList.length);
 
-    for(var i = 0; i < answersList.length; i++){
+    for (var i = 0; i < answersList.length; i++) {
       answersList[i] = answersList[i].substring(3).trim();
     }
-    
+
     //save Lists for database
     await addKeep(questionsList, answersList);
 

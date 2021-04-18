@@ -1,21 +1,21 @@
 {
-  "name": "quiz_generator",
-  "short_name": "quiz_generator",
+  "name": "Keepmind's Quiz Generator",
+  "short_name": "Keepmind's Quiz",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0175C2",
   "theme_color": "#0175C2",
-  "description": "A new Flutter project.",
+  "description": "An amazing tool to skyrocket your retention of books.",
   "orientation": "portrait-primary",
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "icons/Icon-192.png",
+      "src": "logo_brain_sm.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/Icon-512.png",
+      "src": "logo_brain.png",
       "sizes": "512x512",
       "type": "image/png"
     }

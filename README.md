@@ -1,16 +1,12 @@
-# quiz_generator
+# Keepmind's Quiz Generator
 
-An automatic quiz generator with answer scoring using OpenAI's GPT-3.
+An amazing tool to skyrocket your retention of books.
 
-## Getting Started
+## Running the code
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+To run the code, install Flutter and run
+```
+flutter run
+```
+in the root directory. Alternatively, visit https://quiz-generator-46501.web.app to view a hosted
+version.

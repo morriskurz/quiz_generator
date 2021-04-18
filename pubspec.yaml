@@ -66,6 +66,8 @@ flutter:
     - logo.png
     - keeps.png
     - add.png
+    - logo_brain.png
+    - logo_brain_sm.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
