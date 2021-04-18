@@ -58,16 +58,6 @@ class _QuestionPageState extends State<QuestionPage> {
     });
   }
 
-  void _previousIndex() {
-    // Reset value so that it does not reveal the answer on the next question immediately.
-    _questionAnswerWidgets[_currentIndex - 1].displayingAnswerNotifier.value =
-        false;
-    setState(() {
-      _currentIndex--;
-      _displayingAnswer = false;
-    });
-  }
-
   double _getProgressPercentage() {
     if (_questionAnswerWidgets.isEmpty) {
       return 1;

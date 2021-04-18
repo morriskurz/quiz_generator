@@ -1,9 +1,6 @@
 import 'dart:core';
 
 import 'package:flutter/material.dart';
-import 'package:openai_gpt3_api/completion.dart';
-import 'package:openai_gpt3_api/invalid_request_exception.dart';
-import 'package:quiz_generator/utils/constants.dart';
 
 class QuestionAnswerWidget extends StatefulWidget {
   QuestionAnswerWidget(
@@ -23,25 +20,7 @@ class QuestionAnswerWidget extends StatefulWidget {
 
 class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
   TextEditingController controller;
-  bool _loading;
-  String _answerText;
   bool displayingAnswer = false;
-
-  void _submitAnswer() async {
-    setState(() => _loading = true);
-    CompletionApiResult result;
-    try {
-      //result = await Constants.api!.completion(controller.text);
-    } on InvalidRequestException catch (e) {
-      setState(() => _loading = false);
-      showErrorSnackBar(e, context);
-      return;
-    }
-    setState(() {
-      _loading = false;
-      _answerText = widget.answer;
-    });
-  }
 
   void _displayAnswer() {
     widget.displayingAnswerNotifier.value = true;
@@ -94,10 +73,7 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
     super.initState();
   }
 
-  _QuestionAnswerWidgetState()
-      : controller = TextEditingController(),
-        _loading = false,
-        _answerText = '';
+  _QuestionAnswerWidgetState() : controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {

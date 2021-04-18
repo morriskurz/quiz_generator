@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -123,7 +122,9 @@ class _MyHomePageState extends State<MyHomePage> {
           'timesWrong': 0
         })
         .then((value) => {print('Book Added'), keepnumber++})
-        .catchError((error) => print('Failed to add book: $error'));
+        .catchError((error) {
+          print('Failed to add book: $error');
+        });
   }
 
   void _openFileExplorer() async {
@@ -149,11 +150,6 @@ class _MyHomePageState extends State<MyHomePage> {
           _paths != null ? _paths!.map((e) => e.name).toString() : '...';
     });
     _readPdf();
-  }
-
-  Future<List<int>> _readDocumentData() async {
-    final file = File(_paths!.first.path!);
-    return file.readAsBytes();
   }
 
   void _readPdf() async {

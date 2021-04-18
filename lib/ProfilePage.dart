@@ -12,7 +12,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final _boxTextStyle = const TextStyle(
     fontFamily: 'Roboto',
     fontSize: 30,
-    color: const Color(0xde000000),
+    color: Color(0xde000000),
     letterSpacing: -0.48,
     fontWeight: FontWeight.w300,
     height: 1.2,
