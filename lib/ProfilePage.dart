@@ -44,24 +44,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 26, 26, 26),
-        title: TextButton(
-            onPressed: () => navigateToHome(context),
-            child: Image.asset(
-              'assets/logo.png',
-              fit: BoxFit.fitHeight,
-              scale: 2.5,
-            )),
-        actions: [
-          TextButton(
-            onPressed: () {
-              signInWithGoogle();
-            },
-            child: Text('LOG IN'),
-          )
-        ],
-      ),
+      appBar: getAppBar(context),
       body: Column(
         children: [
           Expanded(

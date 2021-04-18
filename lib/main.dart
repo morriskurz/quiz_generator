@@ -235,7 +235,9 @@ class _MyHomePageState extends State<MyHomePage> {
     print('Nr of words: $numberOfWords');
     text =
         'What are some key points I should know when studying this text:\n\"\"\"' +
-            text.substring(0, min(numberOfWords * 4, 6000)) +
+            ((numberOfWords > 1200)
+                ? text.substring(0, min(numberOfWords * 4, 6000))
+                : text) +
             '\n\"\"\"\n1.';
 
     setState(() => _loading = true);
@@ -246,7 +248,7 @@ class _MyHomePageState extends State<MyHomePage> {
           stop: '\n\n',
           engine: Engine.curieInstruct,
           maxTokens: 100,
-          temperature: 0.5,
+          temperature: 0.02,
           frequencyPenalty: 0.15,
           presencePenalty: 0.15,
           topP: 1);
@@ -256,11 +258,11 @@ class _MyHomePageState extends State<MyHomePage> {
           '\n\"\"\"\n1.';
       questions = await Constants.api!.completion(text,
           stop: '\n\n',
-          engine: Engine.curieInstruct,
-          maxTokens: 100,
-          temperature: 0.4,
-          frequencyPenalty: 0.15,
-          presencePenalty: 0.15,
+          engine: Engine.davinciInstruct,
+          maxTokens: 200,
+          temperature: 0,
+          frequencyPenalty: 0.0,
+          presencePenalty: 0.2,
           topP: 1);
     } on InvalidRequestException catch (e) {
       showErrorSnackBar(e, context);
@@ -301,26 +303,7 @@ class _MyHomePageState extends State<MyHomePage> {
       return LoadingOverlay(isLoading: true, child: Container());
     }
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 26, 26, 26),
-        title: TextButton(
-            onPressed: () => navigateToHome(context),
-            child: Image.asset(
-              'assets/logo.png',
-              fit: BoxFit.fitHeight,
-              scale: 2.5,
-            )),
-        actions: [
-          TextButton(
-            onPressed: () {
-              if (_initialized) {
-                signInWithGoogle();
-              }
-            },
-            child: Text('LOG IN'),
-          )
-        ],
-      ),
+      appBar: getAppBar(context),
       body: LoadingOverlay(
         isLoading: _loading,
         child: Stack(
@@ -375,15 +358,15 @@ class _MyHomePageState extends State<MyHomePage> {
                               children: [
                                 Center(
                                   child: Text(
-                                    _fileName ?? 'Upload a PDF',
+                                    _fileName ?? 'Upload PDF',
                                     overflow: TextOverflow.clip,
                                     style: TextStyle(
                                       fontFamily: 'Roboto',
                                       fontSize: min(
                                           MediaQuery.of(context).size.width /
-                                              30,
+                                              40,
                                           MediaQuery.of(context).size.height /
-                                              30),
+                                              40),
                                       color: Color(0xde000000),
                                       letterSpacing: -0.48,
                                       fontWeight: FontWeight.w300,
@@ -391,12 +374,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                     ),
                                   ),
                                 ),
-                                Icon(Icons.file_upload,
-                                    color: Colors.black87,
-                                    size: min(
-                                      MediaQuery.of(context).size.width / 20,
-                                      MediaQuery.of(context).size.height / 10,
-                                    )),
+                                Expanded(
+                                  child: Icon(Icons.file_upload,
+                                      color: Colors.black87,
+                                      size: min(
+                                        MediaQuery.of(context).size.width / 20,
+                                        MediaQuery.of(context).size.height / 10,
+                                      )),
+                                ),
                               ],
                             ),
                           )),

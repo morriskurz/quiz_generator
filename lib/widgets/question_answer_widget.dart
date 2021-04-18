@@ -79,7 +79,11 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
         height: MediaQuery.of(context).size.width / 8,
         width: MediaQuery.of(context).size.width / 2,
         child: OutlinedButton(
-            onPressed: _displayAnswer, child: Text('Display answer')));
+            onPressed: _displayAnswer,
+            child: Text(
+              'Think about the answer, then check it here.',
+              style: TextStyle(fontSize: 15),
+            )));
   }
 
   @override

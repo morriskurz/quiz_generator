@@ -119,7 +119,7 @@ final boxColor = const Color(0xFFF3F3F3);
 Widget textDivider(String text) {
   return Row(children: <Widget>[
     Expanded(
-      child: new Container(
+      child: Container(
           margin: const EdgeInsets.only(left: 10.0, right: 20.0),
           child: Divider()),
     ),
@@ -138,4 +138,35 @@ Widget textDivider(String text) {
           child: Divider()),
     ),
   ]);
+}
+
+AppBar getAppBar(BuildContext context) {
+  return AppBar(
+    backgroundColor: Color.fromARGB(255, 26, 26, 26),
+    title: TextButton(
+        onPressed: () => navigateToHome(context),
+        child: Image.asset(
+          'assets/logo.png',
+          fit: BoxFit.fitHeight,
+          scale: 2.5,
+        )),
+    actions: [
+      TextButton(
+        onPressed: () {
+          switchToProfile(context);
+        },
+        child: Text('PROFILE'),
+      ),
+      TextButton(
+        onPressed: () {
+          signInWithGoogle();
+        },
+        child: Text('LOG IN'),
+      ),
+    ],
+  );
+}
+
+void switchToProfile(BuildContext context) {
+  Navigator.pushReplacementNamed(context, '/profile');
 }

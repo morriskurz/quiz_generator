@@ -88,24 +88,7 @@ class _QuestionPageState extends State<QuestionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 26, 26, 26),
-        title: TextButton(
-            onPressed: () => navigateToHome(context),
-            child: Image.asset(
-              'assets/logo.png',
-              fit: BoxFit.fitHeight,
-              scale: 2.5,
-            )),
-        actions: [
-          TextButton(
-            onPressed: () {
-              signInWithGoogle();
-            },
-            child: Text('LOG IN'),
-          )
-        ],
-      ),
+      appBar: getAppBar(context),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(15.0),
@@ -141,33 +124,49 @@ class _QuestionPageState extends State<QuestionPage> {
                         height: MediaQuery.of(context).size.width / 12,
                         width: MediaQuery.of(context).size.width / 6,
                         child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                                primary: Colors.redAccent),
                             onPressed: _displayingAnswer ? _againButton : null,
-                            child: Text('Again'))),
+                            child: Text(
+                              'Again',
+                              style: TextStyle(fontSize: 24),
+                            ))),
                     Container(
                         height: MediaQuery.of(context).size.width / 12,
                         width: MediaQuery.of(context).size.width / 6,
                         child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                                primary: Colors.blueAccent),
                             onPressed:
                                 _displayingAnswer ? _difficultyButton : null,
-                            child: Text('Hard'))),
+                            child: Text(
+                              'Hard',
+                              style: TextStyle(fontSize: 24),
+                            ))),
                     Container(
-                        height: MediaQuery.of(context).size.width / 12,
-                        width: MediaQuery.of(context).size.width / 6,
-                        child: OutlinedButton(
-                            onPressed:
-                                _displayingAnswer ? _difficultyButton : null,
-                            child: Text('Easy')))
+                      height: MediaQuery.of(context).size.width / 12,
+                      width: MediaQuery.of(context).size.width / 6,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                            primary: Colors.greenAccent),
+                        onPressed: _displayingAnswer ? _difficultyButton : null,
+                        child: Text(
+                          'Easy',
+                          style: TextStyle(fontSize: 24),
+                        ),
+                      ),
+                    )
                   ],
                 ),
               ),
-              ElevatedButton(
+              /*ElevatedButton(
                   onPressed: _currentIndex == 0 ? null : _previousIndex,
                   child: Text('Back')),
               ElevatedButton(
                   onPressed: _currentIndex == _questionAnswerWidgets.length - 1
                       ? null
                       : _nextIndex,
-                  child: Text('Next')),
+                  child: Text('Next')),*/
             ],
           ),
         ),
