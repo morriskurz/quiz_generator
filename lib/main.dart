@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,7 +10,6 @@ import 'package:loading_overlay/loading_overlay.dart';
 import 'package:openai_gpt3_api/completion.dart';
 import 'package:openai_gpt3_api/invalid_request_exception.dart';
 import 'package:openai_gpt3_api/openai_gpt3_api.dart';
-import 'package:quiz_generator/ProfilePage.dart';
 import 'package:quiz_generator/QuestionPage.dart';
 import 'package:quiz_generator/utils/constants.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
@@ -35,8 +33,8 @@ class MyApp extends StatelessWidget {
         var routes = <String, WidgetBuilder>{
           '/': (ctx) => MyHomePage(),
           '/qa': (ctx) => QuestionPage(
-            args: settings.arguments as QuestionPageArguments?,
-          ),
+                args: settings.arguments as QuestionPageArguments?,
+              ),
         };
         var builder = routes[settings.name];
         return MaterialPageRoute(builder: (ctx) => builder!(ctx));
@@ -109,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
     var questionsAndAnswersMap = <String, String>{};
 
     var iterator = 0;
-    for(final question in questionsList){
+    for (final question in questionsList) {
       questionsAndAnswersMap[question] = answersList[iterator++];
     }
 
@@ -117,10 +115,10 @@ class _MyHomePageState extends State<MyHomePage> {
     return books
         .doc('Marc')
         .set({
-      'questions_answers': questionsAndAnswersMap,
-      'timesCorrect': 0,
-      'timesWrong': 0
-    })
+          'questions_answers': questionsAndAnswersMap,
+          'timesCorrect': 0,
+          'timesWrong': 0
+        })
         .then((value) => print('Book Added'))
         .catchError((error) => print('Failed to add book: $error'));
   }
@@ -142,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (!mounted) return;
     setState(() {
       _fileName =
-      _paths != null ? _paths!.map((e) => e.name).toString() : '...';
+          _paths != null ? _paths!.map((e) => e.name).toString() : '...';
     });
     _readPdf();
   }
