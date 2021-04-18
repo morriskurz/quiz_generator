@@ -14,6 +14,7 @@ import 'package:quiz_generator/ProfilePage.dart';
 import 'package:quiz_generator/QuestionPage.dart';
 import 'package:quiz_generator/utils/constants.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _loading;
   bool _initialized;
   // CollectionReference called books that references the firestore collection
-  CollectionReference books = FirebaseFirestore.instance.collection('books');
+  CollectionReference keeps = FirebaseFirestore.instance.collection('books');
 
   // File picking
   final _pickingType = FileType.custom;
@@ -104,9 +105,10 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<void> addBook(List<String> questionsList, List<String> answersList) {
+  Future<void> addKeep(List<String> questionsList, List<String> answersList) {
     //List of all questions and answers
     var questionsAndAnswersMap = <String, String>{};
+    var keepnumber = 0;
 
     var iterator = 0;
     for (final question in questionsList) {
@@ -114,14 +116,14 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     // Call the user's CollectionReference to add a new user
-    return books
-        .doc('Marc')
+    return keeps
+        .doc('keep' + keepnumber.toString())
         .set({
           'questions_answers': questionsAndAnswersMap,
           'timesCorrect': 0,
           'timesWrong': 0
         })
-        .then((value) => print('Book Added'))
+        .then((value) => {print('Book Added'),keepnumber++})
         .catchError((error) => print('Failed to add book: $error'));
   }
 
@@ -278,7 +280,7 @@ class _MyHomePageState extends State<MyHomePage> {
     answersList.length = min(questionsList.length, answersList.length);
 
     //save Lists for database
-    await addBook(questionsList, answersList);
+    await addKeep(questionsList, answersList);
 
     await Navigator.pushNamed(context, '/qa',
         arguments: QuestionPageArguments(questionsList, answersList));
