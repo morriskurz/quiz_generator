@@ -118,7 +118,7 @@ class _QuestionPageState extends State<QuestionPage> {
                                 primary: Colors.redAccent),
                             onPressed: _displayingAnswer ? _againButton : null,
                             child: Text(
-                              'Again',
+                              'Didn\'t know it',
                               style: TextStyle(fontSize: 24),
                             ))),
                     Container(
@@ -130,7 +130,7 @@ class _QuestionPageState extends State<QuestionPage> {
                             onPressed:
                                 _displayingAnswer ? _difficultyButton : null,
                             child: Text(
-                              'Hard',
+                              'That was hard',
                               style: TextStyle(fontSize: 24),
                             ))),
                     Container(
@@ -141,7 +141,7 @@ class _QuestionPageState extends State<QuestionPage> {
                             primary: Colors.greenAccent),
                         onPressed: _displayingAnswer ? _difficultyButton : null,
                         child: Text(
-                          'Easy',
+                          'Knew it',
                           style: TextStyle(fontSize: 24),
                         ),
                       ),
