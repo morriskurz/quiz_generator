@@ -28,6 +28,13 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
   }
 
   Widget _getDisplayingAnswerWidget() {
+    var screenWidth = MediaQuery.of(context).size.width;
+    var width = MediaQuery.of(context).orientation == Orientation.portrait
+        ? screenWidth / 1.3
+        : screenWidth / 2;
+    var height = MediaQuery.of(context).orientation == Orientation.portrait
+        ? screenWidth / (1.3 * 3)
+        : screenWidth / 8;
     if (displayingAnswer) {
       return Container(
           alignment: Alignment.topCenter,
@@ -37,8 +44,8 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
                 Radius.circular(5.0) //         <--- border radius here
                 ),
           ),
-          height: MediaQuery.of(context).size.width / 8,
-          width: MediaQuery.of(context).size.width / 2,
+          height: height,
+          width: width,
           child: Padding(
             padding: const EdgeInsets.all(15.0),
             child: Text(
@@ -55,8 +62,8 @@ class _QuestionAnswerWidgetState extends State<QuestionAnswerWidget> {
           ));
     }
     return Container(
-        height: MediaQuery.of(context).size.width / 8,
-        width: MediaQuery.of(context).size.width / 2,
+        height: height,
+        width: width,
         child: OutlinedButton(
             onPressed: _displayAnswer,
             child: Text(

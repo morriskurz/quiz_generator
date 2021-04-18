@@ -77,6 +77,16 @@ class _QuestionPageState extends State<QuestionPage> {
 
   @override
   Widget build(BuildContext context) {
+    var screenWidth = MediaQuery.of(context).size.width;
+    var width = MediaQuery.of(context).orientation == Orientation.portrait
+        ? screenWidth / 4
+        : screenWidth / 6;
+    var height = MediaQuery.of(context).orientation == Orientation.portrait
+        ? screenWidth / 8
+        : screenWidth / 12;
+    var fontSize = MediaQuery.of(context).orientation == Orientation.portrait
+        ? 15.0
+        : 24.0;
     return Scaffold(
       appBar: getAppBar(context),
       body: Center(
@@ -111,19 +121,19 @@ class _QuestionPageState extends State<QuestionPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Container(
-                        height: MediaQuery.of(context).size.width / 12,
-                        width: MediaQuery.of(context).size.width / 6,
+                        height: height,
+                        width: width,
                         child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
                                 primary: Colors.redAccent),
                             onPressed: _displayingAnswer ? _againButton : null,
                             child: Text(
                               'Didn\'t know it',
-                              style: TextStyle(fontSize: 24),
+                              style: TextStyle(fontSize: fontSize),
                             ))),
                     Container(
-                        height: MediaQuery.of(context).size.width / 12,
-                        width: MediaQuery.of(context).size.width / 6,
+                        height: height,
+                        width: width,
                         child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
                                 primary: Colors.blueAccent),
@@ -131,18 +141,18 @@ class _QuestionPageState extends State<QuestionPage> {
                                 _displayingAnswer ? _difficultyButton : null,
                             child: Text(
                               'That was hard',
-                              style: TextStyle(fontSize: 24),
+                              style: TextStyle(fontSize: fontSize),
                             ))),
                     Container(
-                      height: MediaQuery.of(context).size.width / 12,
-                      width: MediaQuery.of(context).size.width / 6,
+                      height: height,
+                      width: width,
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
                             primary: Colors.greenAccent),
                         onPressed: _displayingAnswer ? _difficultyButton : null,
                         child: Text(
                           'Knew it',
-                          style: TextStyle(fontSize: 24),
+                          style: TextStyle(fontSize: fontSize),
                         ),
                       ),
                     )
