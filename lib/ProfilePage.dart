@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:openai_gpt3_api/invalid_request_exception.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:quiz_generator/utils/constants.dart';
 
@@ -33,9 +34,17 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _myKeeps() {}
+  void _myKeeps() {
+    showErrorSnackBar(
+        InvalidRequestException('Sorry, this feature is not implemented yet.'),
+        context);
+  }
 
-  void _dailyRepetition() {}
+  void _dailyRepetition() {
+    showErrorSnackBar(
+        InvalidRequestException('Sorry, this feature is not implemented yet.'),
+        context);
+  }
 
   void _addAKeep() {
     Navigator.pushNamed(context, '/');
