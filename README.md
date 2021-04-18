@@ -1,6 +1,6 @@
 # Keepmind's Quiz Generator
 
-An amazing tool to skyrocket your retention of books. It uses the capabilities of GPT-3 to analyze any book or text you want, so it can generate questions on the key points. Developed in under 48 hours at the TUM.ai GPT-3 Makeathon.
+An amazing tool to skyrocket your retention of books. It uses the capabilities of GPT-3 to analyze any book or text you want, so it can generate questions on the key points. Future versions include the capabilities of spaced repetition, so that you get reminded to repeat the content of a book you like at the optimal time points. Developed in under 48 hours at the TUM.ai GPT-3 Makeathon.
 
 ## Running the code
 
