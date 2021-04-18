@@ -33,6 +33,14 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  void _myKeeps() {}
+
+  void _dailyRepetition() {}
+
+  void _addAKeep() {
+    Navigator.pushNamed(context, '/');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,71 +83,93 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _getBox(Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    'Daily repetition',
-                    style: _boxTextStyle,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(30.0),
-                    child: LinearPercentIndicator(
-                      animation: true,
-                      linearGradient: LinearGradient(
-                        colors: [
-                          Color.fromARGB(255, 0, 116, 252),
-                          Color.fromARGB(255, 0, 255, 159),
-                        ],
-                      ),
-                      lineHeight: 20.0,
-                      animationDuration: 500,
-                      percent: 0.7,
-                      center: Text('70%'),
-                    ),
-                  ),
-                ],
-              )),
-              _getBox(Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    'My Keeps',
-                    style: _boxTextStyle,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                        height: MediaQuery.of(context).size.width / 20,
-                        width: MediaQuery.of(context).size.width / 12,
-                        child: Image.asset(
-                          'keeps.png',
-                          fit: BoxFit.scaleDown,
-                        )),
-                  ),
-                ],
-              )),
-              _getBox(Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Expanded(
-                    child: Center(
+              _getBox(ElevatedButton(
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(_boxColor)),
+                onPressed: _dailyRepetition,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Center(
                       child: Text(
-                        'Add a Keep',
+                        'Daily repetition',
                         style: _boxTextStyle,
                       ),
                     ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.only(bottom: 15),
-                    height: MediaQuery.of(context).size.width / 20,
-                    width: MediaQuery.of(context).size.width / 12,
-                    child: Image.asset(
-                      'add.png',
-                      fit: BoxFit.scaleDown,
+                    Padding(
+                      padding: const EdgeInsets.all(30.0),
+                      child: LinearPercentIndicator(
+                        animation: true,
+                        linearGradient: LinearGradient(
+                          colors: [
+                            Color.fromARGB(255, 0, 116, 252),
+                            Color.fromARGB(255, 0, 255, 159),
+                          ],
+                        ),
+                        lineHeight: 20.0,
+                        animationDuration: 500,
+                        percent: 0.7,
+                        center: Text('70%'),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              )),
+              _getBox(ElevatedButton(
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(_boxColor)),
+                onPressed: _myKeeps,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Center(
+                      child: Text(
+                        'My Keeps',
+                        style: _boxTextStyle,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                          height: MediaQuery.of(context).size.width / 20,
+                          width: MediaQuery.of(context).size.width / 12,
+                          child: Image.asset(
+                            'keeps.png',
+                            fit: BoxFit.scaleDown,
+                          )),
+                    ),
+                  ],
+                ),
+              )),
+              _getBox(ElevatedButton(
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(_boxColor)),
+                onPressed: _addAKeep,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          'Add a Keep',
+                          style: _boxTextStyle,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(bottom: 15),
+                      height: MediaQuery.of(context).size.width / 20,
+                      width: MediaQuery.of(context).size.width / 12,
+                      child: Image.asset(
+                        'add.png',
+                        fit: BoxFit.scaleDown,
+                      ),
+                    ),
+                  ],
+                ),
               )),
             ],
           )),

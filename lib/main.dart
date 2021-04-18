@@ -10,6 +10,7 @@ import 'package:loading_overlay/loading_overlay.dart';
 import 'package:openai_gpt3_api/completion.dart';
 import 'package:openai_gpt3_api/invalid_request_exception.dart';
 import 'package:openai_gpt3_api/openai_gpt3_api.dart';
+import 'package:quiz_generator/ProfilePage.dart';
 import 'package:quiz_generator/QuestionPage.dart';
 import 'package:quiz_generator/utils/constants.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
       onGenerateRoute: (RouteSettings settings) {
         var routes = <String, WidgetBuilder>{
           '/': (ctx) => MyHomePage(),
+          '/profile': (ctx) => ProfilePage(),
           '/qa': (ctx) => QuestionPage(
                 args: settings.arguments as QuestionPageArguments?,
               ),
@@ -129,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _paths = (await FilePicker.platform.pickFiles(
         type: _pickingType,
         allowMultiple: false,
-        allowedExtensions: ['pdf', 'epub'],
+        allowedExtensions: ['pdf'],
       ))
           ?.files;
     } on PlatformException catch (e) {
@@ -137,7 +139,10 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (ex) {
       print(ex);
     }
-    if (!mounted) return;
+    if (!mounted) {
+      setState(() => _loading = false);
+      return;
+    }
     setState(() {
       _fileName =
           _paths != null ? _paths!.map((e) => e.name).toString() : '...';
@@ -152,6 +157,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _readPdf() async {
     //Load an existing PDF document.
+    if (_paths == null) {
+      setState(() => _loading = false);
+      return;
+    }
     var document = PdfDocument(inputBytes: _paths!.first.bytes);
     setState(() {
       for (var i = 0; i < document.bookmarks.count; i++) {
@@ -167,13 +176,6 @@ class _MyHomePageState extends State<MyHomePage> {
           context);
       return;
     }
-    print(_chapterNames);
-    print(document.bookmarks[0].title);
-    print(document.bookmarks[0].action);
-    print(document.bookmarks[0].destination);
-    print(document.bookmarks[0].count);
-    print(document.bookmarks[0].color);
-    print(document.sections);
     //Create a new instance of the PdfTextExtractor.
     //var extractor = PdfTextExtractor(document);
 
@@ -186,6 +188,10 @@ class _MyHomePageState extends State<MyHomePage> {
     if (_document == null ||
         _document!.bookmarks.count == 0 ||
         _selectedChapterIndex == null) {
+      showErrorSnackBar(
+          InvalidRequestException(
+              'Please select a document and chapter first.'),
+          context);
       return;
     }
     PdfPage firstPage;
@@ -326,17 +332,67 @@ class _MyHomePageState extends State<MyHomePage> {
               flex: 8, // 60%
               child: Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
-                    Row(
-                      children: [
-                        Expanded(child: Text(_fileName ?? '')),
-                        Flexible(
-                          child: TextButton(
-                            onPressed: () => _openFileExplorer(),
-                            child: Text('Upload PDF'),
-                          ),
+                    Center(
+                      child: Container(
+                          alignment: Alignment.centerRight,
+                          height: 100,
+                          child: buildFloatingSearchBar(context)),
+                    ),
+                    textDivider('OR'),
+                    Text('Copy a text', style: boxTextStyle),
+                    Flexible(
+                      child: TextField(
+                        controller: controller,
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 4,
+                        minLines: 4,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Input your text here',
                         ),
+                      ),
+                    ),
+                    textDivider('OR'),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: boxColor,
+                        border: Border.all(color: boxColor, width: 1.0),
+                        borderRadius: BorderRadius.all(Radius.circular(
+                                20.0) //         <--- border radius here
+                            ),
+                      ),
+                      height: MediaQuery.of(context).size.width / 10,
+                      width: MediaQuery.of(context).size.width / 6,
+                      child: Center(
+                          child: ElevatedButton(
+                        style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(boxColor)),
+                        onPressed: _openFileExplorer,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Center(
+                              child: Text(
+                                _fileName ?? 'Upload a PDF',
+                                style: boxTextStyle,
+                              ),
+                            ),
+                            Icon(
+                              Icons.file_upload,
+                              color: Colors.black87,
+                              size: 48,
+                            ),
+                          ],
+                        ),
+                      )),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
                         DropdownButton<int>(
                           onChanged: (value) => setState(() {
                             _selectedChapterIndex = value!;
@@ -350,20 +406,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               .toList(growable: false),
                         ),
                         TextButton(
-                            onPressed: _printChapter, child: Text('DEBUG'))
+                            onPressed: _printChapter, child: Text('GENERATE'))
                       ],
-                    ),
-                    Flexible(
-                      child: TextField(
-                        controller: controller,
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                        minLines: 5,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Input your text here',
-                        ),
-                      ),
                     ),
                     Flexible(
                       child: TextField(

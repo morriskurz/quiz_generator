@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:material_floating_search_bar/material_floating_search_bar.dart';
 import 'package:openai_gpt3_api/invalid_request_exception.dart';
 import 'package:openai_gpt3_api/openai_gpt3_api.dart';
 
@@ -46,4 +47,87 @@ Future<UserCredential> signInWithGoogle() async {
 
   // Or use signInWithRedirect
   // return await FirebaseAuth.instance.signInWithRedirect(googleProvider);
+}
+
+Widget buildFloatingSearchBar(BuildContext context) {
+  final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
+
+  return FloatingSearchBar(
+    hint: 'Search for a book...',
+    scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
+    transitionDuration: const Duration(milliseconds: 800),
+    transitionCurve: Curves.easeInOut,
+    physics: const BouncingScrollPhysics(),
+    axisAlignment: 0,
+    openAxisAlignment: 0.0,
+    width: isPortrait ? 600 : 500,
+    debounceDelay: const Duration(milliseconds: 500),
+    onQueryChanged: (query) {
+      // Call your model, bloc, controller here.
+    },
+    // Specify a custom transition to be used for
+    // animating between opened and closed stated.
+    transition: CircularFloatingSearchBarTransition(),
+    actions: [
+      FloatingSearchBarAction(
+        showIfOpened: false,
+        child: CircularButton(
+          icon: const Icon(Icons.search),
+          onPressed: () {},
+        ),
+      ),
+      FloatingSearchBarAction.searchToClear(
+        showIfClosed: false,
+      ),
+    ],
+    builder: (context, transition) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Material(
+          color: Colors.white,
+          elevation: 4.0,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: Colors.accents.map((color) {
+              return Container(height: 112, color: color);
+            }).toList(),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+final boxTextStyle = const TextStyle(
+  fontFamily: 'Roboto',
+  fontSize: 30,
+  color: Color(0xde000000),
+  letterSpacing: -0.48,
+  fontWeight: FontWeight.w300,
+  height: 1.2,
+);
+final boxColor = const Color(0xFFF3F3F3);
+
+Widget textDivider(String text) {
+  return Row(children: <Widget>[
+    Expanded(
+      child: new Container(
+          margin: const EdgeInsets.only(left: 10.0, right: 20.0),
+          child: Divider()),
+    ),
+    Text(text,
+        style: TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 20,
+          color: Color(0xae000000),
+          letterSpacing: -0.48,
+          fontWeight: FontWeight.w300,
+          height: 1.2,
+        )),
+    Expanded(
+      child: new Container(
+          margin: const EdgeInsets.only(left: 20.0, right: 10.0),
+          child: Divider()),
+    ),
+  ]);
 }
