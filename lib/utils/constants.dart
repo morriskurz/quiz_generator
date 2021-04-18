@@ -55,13 +55,13 @@ Widget buildFloatingSearchBar(BuildContext context) {
   return FloatingSearchBar(
     hint: 'Search for a book...',
     scrollPadding: const EdgeInsets.only(top: 16, bottom: 56),
-    transitionDuration: const Duration(milliseconds: 800),
+    transitionDuration: const Duration(milliseconds: 200),
     transitionCurve: Curves.easeInOut,
     physics: const BouncingScrollPhysics(),
     axisAlignment: 0,
     openAxisAlignment: 0.0,
     width: isPortrait ? 600 : 500,
-    debounceDelay: const Duration(milliseconds: 500),
+    debounceDelay: const Duration(milliseconds: 200),
     onQueryChanged: (query) {
       // Call your model, bloc, controller here.
     },
@@ -86,12 +86,20 @@ Widget buildFloatingSearchBar(BuildContext context) {
         child: Material(
           color: Colors.white,
           elevation: 4.0,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: Colors.accents.map((color) {
-              return Container(height: 112, color: color);
-            }).toList(),
-          ),
+          child: Container(
+              height: 112,
+              child: Center(
+                  child: Text(
+                'Sorry, no books saved yet. You can add one below.',
+                style: TextStyle(
+                  fontFamily: 'Roboto',
+                  fontSize: 20,
+                  color: Color(0xde000000),
+                  letterSpacing: -0.48,
+                  fontWeight: FontWeight.w300,
+                  height: 1.2,
+                ),
+              ))),
         ),
       );
     },

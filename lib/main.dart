@@ -14,7 +14,6 @@ import 'package:quiz_generator/ProfilePage.dart';
 import 'package:quiz_generator/QuestionPage.dart';
 import 'package:quiz_generator/utils/constants.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -123,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
           'timesCorrect': 0,
           'timesWrong': 0
         })
-        .then((value) => {print('Book Added'),keepnumber++})
+        .then((value) => {print('Book Added'), keepnumber++})
         .catchError((error) => print('Failed to add book: $error'));
   }
 
@@ -324,112 +323,128 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: LoadingOverlay(
         isLoading: _loading,
-        child: Row(
+        child: Stack(
           children: [
-            Expanded(
-              flex: 1, // 20%
-              child: Container(),
-            ),
-            Expanded(
-              flex: 8, // 60%
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Center(
-                      child: Container(
-                          alignment: Alignment.centerRight,
-                          height: 100,
-                          child: buildFloatingSearchBar(context)),
-                    ),
-                    textDivider('OR'),
-                    Text('Copy a text', style: boxTextStyle),
-                    Flexible(
-                      child: TextField(
-                        controller: controller,
-                        keyboardType: TextInputType.multiline,
-                        maxLines: 4,
-                        minLines: 4,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Input your text here',
+            Row(
+              children: [
+                Expanded(
+                  flex: 2, // 20%
+                  child: Container(),
+                ),
+                Expanded(
+                  flex: 6, // 60%
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Container(height: 30),
+                        textDivider('OR'),
+                        Text('Copy a text', style: boxTextStyle),
+                        Flexible(
+                          child: TextField(
+                            controller: controller,
+                            keyboardType: TextInputType.multiline,
+                            maxLines: 4,
+                            minLines: 4,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Input your text here',
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    textDivider('OR'),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: boxColor,
-                        border: Border.all(color: boxColor, width: 1.0),
-                        borderRadius: BorderRadius.all(Radius.circular(
-                                20.0) //         <--- border radius here
+                        textDivider('OR'),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: boxColor,
+                            border: Border.all(color: boxColor, width: 1.0),
+                            borderRadius: BorderRadius.all(Radius.circular(
+                                    20.0) //         <--- border radius here
+                                ),
+                          ),
+                          height: MediaQuery.of(context).size.width / 10,
+                          width: MediaQuery.of(context).size.width / 6,
+                          child: Center(
+                              child: ElevatedButton(
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(boxColor)),
+                            onPressed: _openFileExplorer,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Center(
+                                  child: Text(
+                                    _fileName ?? 'Upload a PDF',
+                                    overflow: TextOverflow.clip,
+                                    style: TextStyle(
+                                      fontFamily: 'Roboto',
+                                      fontSize: min(
+                                          MediaQuery.of(context).size.width /
+                                              30,
+                                          MediaQuery.of(context).size.height /
+                                              30),
+                                      color: Color(0xde000000),
+                                      letterSpacing: -0.48,
+                                      fontWeight: FontWeight.w300,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                ),
+                                Icon(Icons.file_upload,
+                                    color: Colors.black87,
+                                    size: min(
+                                      MediaQuery.of(context).size.width / 20,
+                                      MediaQuery.of(context).size.height / 10,
+                                    )),
+                              ],
                             ),
-                      ),
-                      height: MediaQuery.of(context).size.width / 10,
-                      width: MediaQuery.of(context).size.width / 6,
-                      child: Center(
-                          child: ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all(boxColor)),
-                        onPressed: _openFileExplorer,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          )),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Center(
-                              child: Text(
-                                _fileName ?? 'Upload a PDF',
-                                style: boxTextStyle,
-                              ),
+                            DropdownButton<int>(
+                              onChanged: (value) => setState(() {
+                                _selectedChapterIndex = value!;
+                              }),
+                              value: _selectedChapterIndex,
+                              hint: const Text('Which chapter?'),
+                              items: _chapterNames
+                                  .map((e) => DropdownMenuItem(
+                                      value: _chapterNames.indexOf(e),
+                                      child: Text(e)))
+                                  .toList(growable: false),
                             ),
-                            Icon(
-                              Icons.file_upload,
-                              color: Colors.black87,
-                              size: 48,
-                            ),
+                            TextButton(
+                                onPressed: _printChapter,
+                                child: Text('GENERATE'))
                           ],
                         ),
-                      )),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        DropdownButton<int>(
-                          onChanged: (value) => setState(() {
-                            _selectedChapterIndex = value!;
-                          }),
-                          value: _selectedChapterIndex,
-                          hint: const Text('Which chapter?'),
-                          items: _chapterNames
-                              .map((e) => DropdownMenuItem(
-                                  value: _chapterNames.indexOf(e),
-                                  child: Text(e)))
-                              .toList(growable: false),
-                        ),
-                        TextButton(
-                            onPressed: _printChapter, child: Text('GENERATE'))
+                        Flexible(
+                          child: TextField(
+                            controller: apiKeyController,
+                            maxLines: 1,
+                            minLines: 1,
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Input your API key here',
+                            ),
+                          ),
+                        )
                       ],
                     ),
-                    Flexible(
-                      child: TextField(
-                        controller: apiKeyController,
-                        maxLines: 1,
-                        minLines: 1,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Input your API key here',
-                        ),
-                      ),
-                    )
-                  ],
+                  ),
                 ),
-              ),
+                Expanded(
+                  flex: 2, // 20%
+                  child: Container(),
+                ),
+              ],
             ),
-            Expanded(
-              flex: 1, // 20%
-              child: Container(),
+            Center(
+              child: Container(child: buildFloatingSearchBar(context)),
             ),
           ],
         ),
