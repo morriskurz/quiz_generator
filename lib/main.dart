@@ -276,6 +276,10 @@ class _MyHomePageState extends State<MyHomePage> {
     questionsList.length = min(questionsList.length, answersList.length);
     answersList.length = min(questionsList.length, answersList.length);
 
+    for(var i = 0; i < answersList.length; i++){
+      answersList[i] = answersList[i].substring(3).trim();
+    }
+    
     //save Lists for database
     await addKeep(questionsList, answersList);
 
